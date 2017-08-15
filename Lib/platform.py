@@ -1350,6 +1350,7 @@ def processor():
 
 _sys_version_parser = re.compile(
     r'([\w.+]+)\s*'  # "version<space>"
+    r'(?:\|[^|]*\|)?\s*' # version extra
     r'\(#?([^,]+)'  # "(#buildno"
     r'(?:,\s*([\w ]*)'  # ", builddate"
     r'(?:,\s*([\w :]*))?)?\)\s*'  # ", buildtime)<space>"
