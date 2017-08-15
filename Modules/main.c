@@ -448,7 +448,8 @@ Py_Main(int argc, char **argv)
         return usage(0, argv[0]);
 
     if (version) {
-        fprintf(stderr, "Python %s\n", PY_VERSION);
+        Py_SetProgramName(argv[0]);
+        fprintf(stderr, "Python %s :: %s\n", PY_VERSION, Anaconda_GetVersion());
         return 0;
     }
 
