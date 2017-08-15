@@ -1236,7 +1236,7 @@ pymain_header(_PyMain *pymain)
         return;
     }
 
-    fprintf(stderr, "Python %s on %s\n", Py_GetVersion(), Py_GetPlatform());
+    fprintf(stderr, "Python %s :: %s on %s\n", Py_GetVersion(), Anaconda_GetVersion(), Py_GetPlatform());
     if (!Py_NoSiteFlag) {
         fprintf(stderr, "%s\n", COPYRIGHT);
     }
