@@ -245,6 +245,7 @@ BUILDPYTHON=	python$(BUILDEXE)
 
 PYTHON_FOR_REGEN=@PYTHON_FOR_REGEN@
 UPDATE_FILE=@PYTHON_FOR_REGEN@ $(srcdir)/Tools/scripts/update_file.py
+PY_BUILD_ENVIRON=@PY_BUILD_ENVIRON@
 PYTHON_FOR_BUILD=@PYTHON_FOR_BUILD@
 _PYTHON_HOST_PLATFORM=@_PYTHON_HOST_PLATFORM@
 BUILD_GNU_TYPE=	@build@
@@ -565,7 +566,7 @@ $(BUILDPYTHON):	Programs/python.o $(LIBRARY) $(LDLIBRARY) $(PY3LIBRARY)
 	$(LINKCC) $(PY_CORE_LDFLAGS) $(LINKFORSHARED) -o $@ Programs/python.o $(BLDLIBRARY) $(LIBS) $(MODLIBS) $(SYSLIBS)
 
 platform: $(BUILDPYTHON) pybuilddir.txt
-	$(RUNSHARED) $(PYTHON_FOR_BUILD) -c 'import sys ; from sysconfig import get_platform ; print("%s-%d.%d" % (get_platform(), *sys.version_info[:2]))' >platform
+	$(RUNSHARED) $(PY_BUILD_ENVIRON) $(PYTHON_FOR_BUILD) -c 'import sys ; from sysconfig import get_platform ; print("%s-%d.%d" % (get_platform(), *sys.version_info[:2]))' >platform
 
 # Create build directory and generate the sysconfig build-time data there.
 # pybuilddir.txt contains the name of the build dir and is used for
@@ -576,7 +577,7 @@ platform: $(BUILDPYTHON) pybuilddir.txt
 # or removed in case of failure.
 pybuilddir.txt: $(BUILDPYTHON)
 	@echo "none" > ./pybuilddir.txt
-	$(RUNSHARED) $(PYTHON_FOR_BUILD) -S -m sysconfig --generate-posix-vars ;\
+	$(RUNSHARED) $(PY_BUILD_ENVIRON) $(PYTHON_FOR_BUILD) -S -m sysconfig --generate-posix-vars ;\
 	if test $$? -ne 0 ; then \
 		echo "generate-posix-vars failed" ; \
 		rm -f ./pybuilddir.txt ; \
@@ -607,7 +608,7 @@ sharedmods: $(BUILDPYTHON) pybuilddir.txt Modules/_math.o
 		$(PYTHON_FOR_BUILD) $(srcdir)/setup.py $$quiet build"; \
 	$(RUNSHARED) CC='$(CC)' LDSHARED='$(BLDSHARED)' OPT='$(OPT)' \
 		_TCLTK_INCLUDES='$(TCLTK_INCLUDES)' _TCLTK_LIBS='$(TCLTK_LIBS)' \
-		$(PYTHON_FOR_BUILD) $(srcdir)/setup.py $$quiet build
+		$(PY_BUILD_ENVIRON) $(PYTHON_FOR_BUILD) $(srcdir)/setup.py $$quiet build
 
 
 # Build static library
@@ -1172,7 +1173,7 @@ install: @FRAMEWORKINSTALLFIRST@ commoninstall bininstall maninstall @FRAMEWORKI
 			upgrade) ensurepip="--upgrade" ;; \
 			install|*) ensurepip="" ;; \
 		esac; \
-		$(RUNSHARED) $(PYTHON_FOR_BUILD) -m ensurepip \
+		$(RUNSHARED) $(PY_BUILD_ENVIRON) $(PYTHON_FOR_BUILD) -m ensurepip \
 			$$ensurepip --root=$(DESTDIR)/ ; \
 	fi
 
@@ -1182,7 +1183,7 @@ altinstall: commoninstall
 			upgrade) ensurepip="--altinstall --upgrade" ;; \
 			install|*) ensurepip="--altinstall" ;; \
 		esac; \
-		$(RUNSHARED) $(PYTHON_FOR_BUILD) -m ensurepip \
+		$(RUNSHARED) $(PY_BUILD_ENVIRON) $(PYTHON_FOR_BUILD) -m ensurepip \
 			$$ensurepip --root=$(DESTDIR)/ ; \
 	fi
 
@@ -1594,7 +1595,7 @@ libainstall:	@DEF_MAKE_RULE@ python-config
 # Install the dynamically loadable modules
 # This goes into $(exec_prefix)
 sharedinstall: sharedmods
-	$(RUNSHARED) $(PYTHON_FOR_BUILD) $(srcdir)/setup.py install \
+	$(RUNSHARED) $(PY_BUILD_ENVIRON) $(PYTHON_FOR_BUILD) $(srcdir)/setup.py install \
 	   	--prefix=$(prefix) \
 		--install-scripts=$(BINDIR) \
 		--install-platlib=$(DESTSHARED) \
@@ -1674,6 +1675,14 @@ frameworkaltinstallunixtools:
 # It is not part of a normal frameworkinstall
 frameworkinstallextras:
 	cd Mac && $(MAKE) installextras DESTDIR="$(DESTDIR)"
+
+# This installs a few of the useful scripts in Tools/scripts
+scriptsinstall:
+	SRCDIR=$(srcdir) $(RUNSHARED) \
+	$(PY_BUILD_ENVIRON) $(PYTHON_FOR_BUILD) $(srcdir)/Tools/scripts/setup.py install \
+	--prefix=$(prefix) \
+	--install-scripts=$(BINDIR) \
+	--root=$(DESTDIR)/
 
 # Build the toplevel Makefile
 Makefile.pre: $(srcdir)/Makefile.pre.in config.status
