@@ -324,9 +324,14 @@ class Mingw32CCompiler (CygwinCCompiler):
         else:
             no_cygwin = ''
 
-        self.set_executables(compiler='gcc%s -O -Wall' % no_cygwin,
-                             compiler_so='gcc%s -mdll -O -Wall' % no_cygwin,
-                             compiler_cxx='g++%s -O -Wall' % no_cygwin,
+        if tuple.__itemsize__ == 4:
+            ms_win=' -DMS_WIN32'
+        else:
+            ms_win=' -DMS_WIN64'
+
+        self.set_executables(compiler='gcc%s -O -Wall%s' % (no_cygwin, ms_win),
+                             compiler_so='gcc%s -mdll -O -Wall%s' % (no_cygwin, ms_win),
+                             compiler_cxx='g++%s -O -Wall%s' % (no_cygwin, ms_win),
                              linker_exe='gcc%s' % no_cygwin,
                              linker_so='%s%s %s %s'
                                     % (self.linker_dll, no_cygwin,
