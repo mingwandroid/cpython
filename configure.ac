@@ -1533,7 +1533,7 @@ then
                     OPT="-g -O0 -Wall"
                 fi
 	    else
-		OPT="-g $WRAP -O3 -Wall"
+		OPT="$WRAP -O3 -Wall"
 	    fi
 	    ;;
 	*)

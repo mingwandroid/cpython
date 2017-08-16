@@ -4252,9 +4252,9 @@ if test "$ac_test_CFLAGS" = set; then
   CFLAGS=$ac_save_CFLAGS
 elif test $ac_cv_prog_cc_g = yes; then
   if test "$GCC" = yes; then
-    CFLAGS="-g -O2"
+    CFLAGS="-O2"
   else
-    CFLAGS="-g"
+    CFLAGS=
   fi
 else
   if test "$GCC" = yes; then
@@ -6901,7 +6901,7 @@ then
                     OPT="-g -O0 -Wall"
                 fi
 	    else
-		OPT="-g $WRAP -O3 -Wall"
+		OPT="$WRAP -O3 -Wall"
 	    fi
 	    ;;
 	*)
