@@ -63,6 +63,15 @@ import os
 import __builtin__
 import traceback
 
+def _fix_prefix(path):
+    path = os.path.normpath(path)
+    if path.endswith('/python.app/Contents'):
+        path = os.path.normpath(path + '/../..')
+    return path
+
+sys.prefix = _fix_prefix(sys.prefix)
+sys.exec_prefix = _fix_prefix(sys.exec_prefix)
+
 # Prefixes for site-packages; add additional prefixes like /usr/local here
 PREFIXES = [sys.prefix, sys.exec_prefix]
 # Enable per user site-packages directory
