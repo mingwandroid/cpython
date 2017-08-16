@@ -82,6 +82,9 @@ def get_msvcr():
         elif msc_ver == '1600':
             # VS2010 / MSVC 10.0
             return ['msvcr100']
+        elif int(msc_ver) >= 1900:
+            # VS2015 / MSVC 14.0
+            return ['msvcr140']
         else:
             raise ValueError("Unknown MS Compiler version %s " % msc_ver)
 
