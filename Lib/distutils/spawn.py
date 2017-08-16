@@ -211,17 +211,33 @@ def find_executable(executable, path=None):
         path = os.environ.get('PATH', os.defpath)
 
     paths = path.split(os.pathsep)
-    base, ext = os.path.splitext(executable)
+    # base, ext = os.path.splitext(executable)
 
-    if (sys.platform == 'win32' or os.name == 'os2') and (ext != '.exe'):
-        executable = executable + '.exe'
+    if (sys.platform == 'win32' or os.name == 'os2'):
+   # This should probably be:
+        # try:
+        #     exts = os.environ['PATHEXT'].lower().split(';')+['']
+        # except:
+        #     exts = ['.exe.', '.bat', '']
+        # but IMHO:
+        # 1. The original `ext` should appear as the first entry.
+        # 2. We should be adding `exts` to `base`, not `executable`
+        # 3. Why even bother? We do not add '.sh' for Unix.
+        exts = ['.exe', '.bat', '']
+    else:
+        exts = ['']
 
     if not os.path.isfile(executable):
-        for p in paths:
-            f = os.path.join(p, executable)
-            if os.path.isfile(f):
-                # the file exists, we have a shot at spawn working
-                return f
-        return None
+        for ext in exts:
+            newexe = executable + ext
+            if os.path.isfile(newexe):
+                return newexe
+            else:
+                for p in paths:
+                    f = os.path.join(p, newexe)
+                    if os.path.isfile(f):
+                        # the file exists, we have a shot at spawn working
+                        return f
     else:
         return executable
+    return None
