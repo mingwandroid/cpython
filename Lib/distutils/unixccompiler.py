@@ -196,6 +196,7 @@ class UnixCCompiler(CCompiler):
 
                 if sys.platform == 'darwin':
                     linker = _osx_support.compiler_fixup(linker, ld_args)
+                    ld_args = ['-arch', 'x86_64'] + ld_args
 
                 self.spawn(linker + ld_args)
             except DistutilsExecError, msg:
