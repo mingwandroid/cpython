@@ -544,6 +544,11 @@ def main():
     # this module is run as a script, because this code is executed twice.
     if hasattr(sys, "setdefaultencoding"):
         del sys.setdefaultencoding
+    if sys.platform == 'win32':
+        # Anaconda Distribution hack in-case the environment has not been activated properly.
+        library_bin = r"%s\Library\bin" % (sys.prefix)
+        if library_bin not in os.environ["PATH"]:
+            os.environ["PATH"] = library_bin+";"+os.environ["PATH"]
 
 main()
 
