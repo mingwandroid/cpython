@@ -517,7 +517,13 @@ class PyBuildExt(build_ext):
         # be assumed that no additional -I,-L directives are needed.
         inc_dirs = self.compiler.include_dirs[:]
         lib_dirs = self.compiler.library_dirs[:]
-        if not cross_compiling:
+        # If we are using a macosx sysroot then ensure we look in
+        # sysroot/usr/{lib,include} (irrespective of whether we condider
+        # this cross_compiling or not).
+        if macosx_sdk_root() != '/':
+            add_dir_to_list(lib_dirs, '/usr/lib')
+            add_dir_to_list(inc_dirs, '/usr/include')
+        elif not cross_compiling:
             for d in (
                 '/usr/include',
                 ):
