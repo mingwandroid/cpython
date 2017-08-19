@@ -138,11 +138,17 @@ def macosx_sdk_root():
     The SDK paths used by Apple-supplied tool chains depend on the
     setting of various variables; see the xcrun man page for more info.
     """
+
     global MACOS_SDK_ROOT
+
+    # This *not* cached in-case we need to change it dynamically
+    if 'CONDA_BUILD_SYSROOT' in os.environ:
+        return os.environ['CONDA_BUILD_SYSROOT']
 
     # If already called, return cached result.
     if MACOS_SDK_ROOT:
         return MACOS_SDK_ROOT
+
 
     cflags = sysconfig.get_config_var('CFLAGS')
     m = re.search(r'-isysroot\s+(\S+)', cflags)
@@ -674,7 +680,13 @@ class PyBuildExt(build_ext):
         # lib_dirs and inc_dirs are used to search for files;
         # if a file is found in one of those directories, it can
         # be assumed that no additional -I,-L directives are needed.
-        if not CROSS_COMPILING:
+        # If we are using a macosx sysroot then ensure we look in
+        # sysroot/usr/{lib,include} (irrespective of whether we consider
+        # this cross_compiling or not).
+        if macosx_sdk_root() != '/':
+            self.lib_dirs = self.compiler.library_dirs + ['/usr/lib']
+            self.inc_dirs = self.compiler.include_dirs + ['/usr/include']
+        elif not CROSS_COMPILING:
             self.lib_dirs = self.compiler.library_dirs + system_lib_dirs
             self.inc_dirs = self.compiler.include_dirs + system_include_dirs
         else:
