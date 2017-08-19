@@ -579,7 +579,13 @@ class PyBuildExt(build_ext):
         # lib_dirs and inc_dirs are used to search for files;
         # if a file is found in one of those directories, it can
         # be assumed that no additional -I,-L directives are needed.
-        if not cross_compiling:
+        # If we are using a macosx sysroot then ensure we look in
+        # sysroot/usr/{lib,include} (irrespective of whether we consider
+        # this cross_compiling or not).
+        if macosx_sdk_root() != '/':
+            lib_dirs = self.compiler.library_dirs + ['/usr/lib']
+            inc_dirs = self.compiler.include_dirs + ['/usr/include']
+        elif not cross_compiling:
             lib_dirs = self.compiler.library_dirs + system_lib_dirs
             inc_dirs = self.compiler.include_dirs + system_include_dirs
         else:
