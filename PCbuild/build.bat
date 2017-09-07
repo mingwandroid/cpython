@@ -88,7 +88,7 @@ if "%IncludeExternals%"=="" set IncludeExternals=true
 if "%IncludeSSL%"=="" set IncludeSSL=true
 if "%IncludeTkinter%"=="" set IncludeTkinter=true
 
-if "%IncludeExternals%"=="true" call "%dir%get_externals.bat"
+rem if "%IncludeExternals%"=="true" call "%dir%get_externals.bat"
 
 if "%do_pgo%" EQU "true" if "%platf%" EQU "x64" (
     if "%PROCESSOR_ARCHITEW6432%" NEQ "AMD64" if "%PROCESSOR_ARCHITECTURE%" NEQ "AMD64" (
