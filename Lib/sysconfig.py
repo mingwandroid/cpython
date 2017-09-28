@@ -329,7 +329,8 @@ def _generate_posix_vars():
     # _sysconfigdata module manually and populate it with the build vars.
     # This is more than sufficient for ensuring the subsequent call to
     # get_platform() succeeds.
-    name = '_sysconfigdata'
+    # _PYTHON_SYSCONFIGDATA_NAME support backported from Python 3.6
+    name = os.environ.get('_PYTHON_SYSCONFIGDATA_NAME', os.environ.get('_CONDA_PYTHON_SYSCONFIGDATA_NAME', '_sysconfigdata'))
     if 'darwin' in sys.platform:
         import imp
         module = imp.new_module(name)
@@ -358,7 +359,10 @@ def _generate_posix_vars():
 def _init_posix(vars):
     """Initialize the module as appropriate for POSIX systems."""
     # _sysconfigdata is generated at build time, see _generate_posix_vars()
-    from _sysconfigdata import build_time_vars
+    # _PYTHON_SYSCONFIGDATA_NAME support backported from Python 3.6
+    name = os.environ.get('_PYTHON_SYSCONFIGDATA_NAME', os.environ.get('_CONDA_PYTHON_SYSCONFIGDATA_NAME', '_sysconfigdata'))
+    _temp = __import__(name, globals(), locals(), ['build_time_vars'], 0)
+    build_time_vars = _temp.build_time_vars
     vars.update(build_time_vars)
 
 def _init_non_posix(vars):
