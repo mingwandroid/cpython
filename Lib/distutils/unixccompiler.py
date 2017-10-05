@@ -232,7 +232,7 @@ class UnixCCompiler(CCompiler):
         # this time, there's no way to determine this information from
         # the configuration data stored in the Python installation, so
         # we use this hack.
-        compiler = os.path.basename(sysconfig.get_config_var("CC"))
+        compiler = os.path.basename(sysconfig.get_config_var("CC").split()[0])
         if sys.platform[:6] == "darwin":
             # MacOSX's linker doesn't understand the -R flag at all
             return "-L" + dir
