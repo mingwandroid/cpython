@@ -1291,6 +1291,7 @@ def buildPython():
 
     fp = open(path, 'w')
     # duplicated from sysconfig._generate_posix_vars()
+    fp.write('# -*- coding: utf-8 -*-\n')
     fp.write('# system configuration generated and used by'
                 ' the sysconfig module\n')
     fp.write('build_time_vars = ')

@@ -347,6 +347,7 @@ def _generate_posix_vars():
     destfile = os.path.join(pybuilddir, name + '.py')
 
     with open(destfile, 'wb') as f:
+        f.write('# -*- coding: utf-8 -*-\n')
         f.write('# system configuration generated and used by'
                 ' the sysconfig module\n')
         f.write('build_time_vars = ')
