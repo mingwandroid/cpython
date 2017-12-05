@@ -73,7 +73,8 @@ if os.name == "ce":
 if os.name == "posix" and sys.platform == "darwin":
     from ctypes.macholib.dyld import dyld_find as _dyld_find
     def find_library(name):
-        possible = ['lib%s.dylib' % name,
+        possible = ['@executable_path/../lib/lib%s.dylib' % name,
+                    'lib%s.dylib' % name,
                     '%s.dylib' % name,
                     '%s.framework/%s' % (name, name)]
         for name in possible:
@@ -270,8 +271,31 @@ elif os.name == "posix":
                 return None
             return res.group(1)
 
+
+        def _findLib_prefix(name):
+            if not name:
+                return None
+            for fullname in (name, "lib%s.so" % (name)):
+                path = os.path.join(sys.prefix, 'lib', fullname)
+                if os.path.exists(path):
+                    return path
+            return None
+
         def find_library(name):
-            return _findSoname_ldconfig(name) or _get_soname(_findLib_gcc(name))
+            # See issue #9998
+            # Yes calling _findLib_prefix twice is deliberate, because _get_soname ditches
+            # the full path.
+            # When objdump is unavailable this returns None
+            so_name = _get_soname(_findLib_prefix(name)) or name
+            if so_name != name:
+                return _findLib_prefix(so_name) or \
+                       _findLib_prefix(name) or \
+                       _findSoname_ldconfig(name) or \
+                       _get_soname(_findLib_gcc(name))
+            else:
+                return _findLib_prefix(name) or \
+                       _findSoname_ldconfig(name) or \
+                       _get_soname(_findLib_gcc(name))
 
 ################################################################
 # test code
