@@ -551,7 +551,8 @@ class PyBuildExt(build_ext):
         # only change this for cross builds for 3.3, issues on Mageia
         if cross_compiling:
             self.add_gcc_paths()
-        self.add_multiarch_paths()
+        else:
+            self.add_multiarch_paths()
 
         # Add paths specified in the environment variables LDFLAGS and
         # CPPFLAGS for header and library files.
