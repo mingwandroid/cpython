@@ -467,6 +467,7 @@ calculate_path(void)
     size_t bufsz;
     char *pythonhome = Py_GetPythonHome();
     char *envpath = Py_GETENV("PYTHONPATH");
+    char * allow_registry_paths = NULL;
 
 #ifdef MS_WINDOWS
     int skiphome, skipdefault;
@@ -512,8 +513,17 @@ calculate_path(void)
 
     skiphome = pythonhome==NULL ? 0 : 1;
 #ifdef Py_ENABLE_SHARED
-    machinepath = getpythonregpath(HKEY_LOCAL_MACHINE, skiphome);
-    userpath = getpythonregpath(HKEY_CURRENT_USER, skiphome);
+    allow_registry_paths = getenv("CONDA_PY_ALLOW_REG_PATHS");
+    if (allow_registry_paths && allow_registry_paths[0] != '0')
+    {
+        machinepath = getpythonregpath(HKEY_LOCAL_MACHINE, skiphome);
+        userpath = getpythonregpath(HKEY_CURRENT_USER, skiphome);
+    }
+    else
+    {
+        machinepath = NULL;
+        userpath = NULL;
+    }
 #endif
     /* We only use the default relative PYTHONPATH if we havent
        anything better to use! */
