@@ -781,9 +781,19 @@ calculate_module_search_path(const PyConfig *config,
 {
     int skiphome = calculate->home==NULL ? 0 : 1;
 #ifdef Py_ENABLE_SHARED
-    calculate->machine_path = getpythonregpath(HKEY_LOCAL_MACHINE, skiphome);
-    calculate->user_path = getpythonregpath(HKEY_CURRENT_USER, skiphome);
+    char * allow_registry_paths = getenv("CONDA_PY_ALLOW_REG_PATHS");
+    if (allow_registry_paths && allow_registry_paths[0] != '0')
+    {
+        calculate->machine_path = getpythonregpath(HKEY_LOCAL_MACHINE, skiphome);
+        calculate->user_path = getpythonregpath(HKEY_CURRENT_USER, skiphome);
+    }
+    else
+    {
+        calculate->machine_path = NULL;
+        calculate->user_path = NULL;
+    }
 #endif
+
     /* We only use the default relative PYTHONPATH if we haven't
        anything better to use! */
     int skipdefault = (config->pythonpath_env != NULL ||
