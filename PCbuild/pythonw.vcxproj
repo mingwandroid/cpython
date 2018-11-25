@@ -97,6 +97,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\PC\WinMain.c" />
+    <ClCompile Include="$(opensslIncludeDir)\openssl\applink.c">
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;$(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="pythoncore.vcxproj">
