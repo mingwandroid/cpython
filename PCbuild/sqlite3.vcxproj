@@ -56,12 +56,12 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
-    <_SqliteVersion>$([System.Text.RegularExpressions.Regex]::Match(`$(sqlite3Dir)`, `((\d+)\.(\d+)\.(\d+)\.(\d+))\\?$`).Groups)</_SqliteVersion>
-    <SqliteVersion>$(_SqliteVersion.Split(`;`)[1])</SqliteVersion>
-    <SqliteMajorVersion>$(_SqliteVersion.Split(`;`)[2])</SqliteMajorVersion>
-    <SqliteMinorVersion>$(_SqliteVersion.Split(`;`)[3])</SqliteMinorVersion>
-    <SqliteMicroVersion>$(_SqliteVersion.Split(`;`)[4])</SqliteMicroVersion>
-    <SqlitePatchVersion>$(_SqliteVersion.Split(`;`)[5])</SqlitePatchVersion>
+    <_SqliteVersion>$(SQLITE3_VERSION)</_SqliteVersion>
+    <SqliteVersion>$(_SqliteVersion)</SqliteVersion>
+    <SqliteMajorVersion>$(_SqliteVersion.Split(`.`)[1])</SqliteMajorVersion>
+    <SqliteMinorVersion>$(_SqliteVersion.Split(`.`)[2])</SqliteMinorVersion>
+    <SqliteMicroVersion>$(_SqliteVersion.Split(`.`)[3])</SqliteMicroVersion>
+    <SqlitePatchVersion>$(_SqliteVersion.Split(`.`)[4])</SqlitePatchVersion>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
