@@ -61,8 +61,11 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(sqlite3Dir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(sqlite3Dir)\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>MODULE_NAME="sqlite3";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    <Link>
+      <AdditionalDependencies>$(sqlite3Dir)\lib\sqlite3.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>

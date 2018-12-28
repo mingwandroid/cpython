@@ -31,8 +31,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "_msi", "_msi.vcxproj", "{31
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "_socket", "_socket.vcxproj", "{86937F53-C189-40EF-8CE8-8759D8E7D480}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "_sqlite3", "_sqlite3.vcxproj", "{13CECB97-4119-4316-9D42-8534019A5A44}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "_ssl", "_ssl.vcxproj", "{C6E20F84-3247-4AD6-B051-B073268F73BA}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "_testcapi", "_testcapi.vcxproj", "{6901D91C-6E48-4BB7-9FEC-700C8131DF1D}"
