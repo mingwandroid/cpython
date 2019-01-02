@@ -186,7 +186,10 @@ class EnvBuilder:
                         basename = 'venvwlauncher'
                     scripts = os.path.dirname(src)
                 else:
-                    scripts = os.path.join(os.path.dirname(__file__), "scripts", "nt")
+                    if basename.startswith('python'):
+                        scripts = sys.prefix
+                    else:
+                        scripts = os.path.join(os.path.dirname(__file__), "scripts", "nt")
                 src = os.path.join(scripts, basename + ext)
 
             shutil.copyfile(src, dst)
@@ -201,9 +204,9 @@ class EnvBuilder:
         binpath = context.bin_path
         path = context.env_exe
         copier = self.symlink_or_copy
+        copier(context.executable, path)
         dirname = context.python_dir
         if os.name != 'nt':
-            copier(context.executable, path)
             if not os.path.islink(path):
                 os.chmod(path, 0o755)
             for suffix in ('python', 'python3'):
