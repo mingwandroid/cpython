@@ -211,7 +211,12 @@ class EnvBuilder:
                     basename = 'venvwlauncher'
                 src = os.path.join(os.path.dirname(src), basename + ext)
             else:
-                src = srcfn
+                if basename.startswith('python'):
+                    scripts = sys.prefix
+                else:
+                    scripts = os.path.join(os.path.dirname(__file__), "scripts", "nt")
+                    src = os.path.join(scripts, basename + ext)
+
             if not os.path.exists(src):
                 if not bad_src:
                     logger.warning('Unable to copy %r', src)
@@ -229,9 +234,9 @@ class EnvBuilder:
         binpath = context.bin_path
         path = context.env_exe
         copier = self.symlink_or_copy
+        copier(context.executable, path)
         dirname = context.python_dir
         if os.name != 'nt':
-            copier(context.executable, path)
             if not os.path.islink(path):
                 os.chmod(path, 0o755)
             for suffix in ('python', 'python3'):
