@@ -217,6 +217,10 @@ dl_funcptr _PyImport_FindSharedFuncptrWindows(const char *prefix,
 #endif
         /* We use LoadLibraryEx so Windows looks for dependent DLLs
             in directory of pathname first. */
+        /* This resyncs values in PATH to AddDllDirectory() */
+        extern int CondaEcosystemModifyDllSearchPath(int, int);
+        CondaEcosystemModifyDllSearchPath(1, 1);
+
         /* XXX This call doesn't exist in Windows CE */
         hDLL = LoadLibraryExW(wpathname, NULL,
                               LOAD_WITH_ALTERED_SEARCH_PATH);
