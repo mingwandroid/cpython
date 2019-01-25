@@ -220,9 +220,21 @@ dl_funcptr _PyImport_FindSharedFuncptrWindows(const char *prefix,
            AddDllDirectory function. We add SEARCH_DLL_LOAD_DIR to
            ensure DLLs adjacent to the PYD are preferred. */
         Py_BEGIN_ALLOW_THREADS
-        hDLL = LoadLibraryExW(wpathname, NULL,
-                              LOAD_LIBRARY_SEARCH_DEFAULT_DIRS |
-                              LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR);
+        /* This resyncs values in PATH to AddDllDirectory() */
+        extern int CondaEcosystemModifyDllSearchPath(int, int);
+        int conda_dll_search_modifications_result = CondaEcosystemModifyDllSearchPath(1, 1);
+        if (conda_dll_search_modifications_result == -1) {
+		    /* Use CPython upstream's code.
+            hDLL = LoadLibraryExW(wpathname, NULL,
+                                  LOAD_LIBRARY_SEARCH_DEFAULT_DIRS |
+                                  LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR);
+		} else {
+		    /* Use conda's thermo-nuclear device (which we should make more fine-grained with
+			   many more env. var switches.  */
+            hDLL = LoadLibraryExW(wpathname, NULL,
+                                  LOAD_WITH_ALTERED_SEARCH_PATH);
+		
+		}
         Py_END_ALLOW_THREADS
 #if HAVE_SXS
         _Py_DeactivateActCtx(cookie);
