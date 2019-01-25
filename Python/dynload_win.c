@@ -191,9 +191,26 @@ dl_funcptr _PyImport_GetDynLoadFunc(const char *fqname, const char *shortname,
                             pathbuf,
                             &dummy)) {
             ULONG_PTR cookie = _Py_ActivateActCtx();
-            /* XXX This call doesn't exist in Windows CE */
-            hDLL = LoadLibraryEx(pathname, NULL,
-                                 LOAD_WITH_ALTERED_SEARCH_PATH);
+            /* This resyncs values in PATH to AddDllDirectory() */
+            extern int CondaEcosystemModifyDllSearchPath(int, int);
+            CondaEcosystemModifyDllSearchPath(1, 1);
+
+            /* It used to be OK to call with pathname and it be relative and
+               then searched for, but this conflicts with AddDllDirectory(). */
+            if (getenv("CONDA_DLL_SEARCH_MODIFICATION_DISABLE") != NULL ||
+                getenv("CONDA_DLL_SEARCH_MODIFICATION_DISABLE_LOADLIBRARY_EX_FULLPATH") != NULL)
+            {
+                /* XXX This call doesn't exist in Windows CE */
+                hDLL = LoadLibraryEx(pathname, NULL,
+                    LOAD_WITH_ALTERED_SEARCH_PATH);
+            }
+            else
+            {
+                /* XXX This call doesn't exist in Windows CE */
+                hDLL = LoadLibraryEx(pathbuf, NULL,
+                    LOAD_WITH_ALTERED_SEARCH_PATH);
+            }
+
             _Py_DeactivateActCtx(cookie);
         }
 
