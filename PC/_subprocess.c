@@ -425,36 +425,95 @@ process ID, and thread ID.\n\
 \n\
 proc_attrs and thread_attrs are ignored internally and can be None.");
 
+
 static PyObject *
 sp_CreateProcess(PyObject* self, PyObject* args)
 {
     BOOL result;
     PROCESS_INFORMATION pi;
-    STARTUPINFO si;
+    STARTUPINFOW si;
     PyObject* environment;
 
-    char* application_name;
-    char* command_line;
     PyObject* process_attributes; /* ignored */
     PyObject* thread_attributes; /* ignored */
     int inherit_handles;
+    int i, j, len;
     int creation_flags;
     PyObject* env_mapping;
-    char* current_directory;
     PyObject* startup_info;
+    #define APPLICATION_NAME 0
+    #define COMMAND_LINE 1
+    #define CURRENT_DIRECTORY 2
+    PyObject* us[3] = {NULL, NULL, NULL};
+    PyObject* ss[3] = {NULL, NULL, NULL};
+    wchar_t* wc[3] = {NULL, NULL, NULL};
 
-    if (! PyArg_ParseTuple(args, "zzOOiiOzO:CreateProcess",
-                           &application_name,
-                           &command_line,
+    if (! PyArg_ParseTuple(args, "OOOOiiOOO:CreateProcess",
+                           &ss[APPLICATION_NAME],
+                           &ss[COMMAND_LINE],
                            &process_attributes,
                            &thread_attributes,
                            &inherit_handles,
                            &creation_flags,
                            &env_mapping,
-                           &current_directory,
+                           &ss[CURRENT_DIRECTORY],
                            &startup_info))
         return NULL;
 
+    /* Was going to use CreateProcessA when all strings, but what about env_mapping? Best to always
+       go Unicode? Also, consider renaming this to CreateProcessW()?
+    if (PyString_Check(ss[APPLICATION_NAME]) && PyString_Check(ss[COMMAND_LINE]) &&
+        PyString_Check(ss[CURRENT_DIRECTORY])) {
+            unicode = FALSE;
+    } else */ {
+        for (i = 0; i < 3; ++i) {
+            if (ss[i] == Py_None) {
+                continue;
+            } else if (PyUnicode_Check(ss[i])) {
+                us[i] = ss[i];
+            } else {
+                us[i] = PyUnicode_FromEncodedObject(ss[i], "utf-8", "strict");
+                if (us[i] == NULL) {
+                    for (j = 0; j < i; ++j) {
+                        if (us[j] != NULL && ss[j] != us[j]) {
+                            Py_DECREF(us[j]);
+                        }
+                    }
+                    return NULL;
+                }
+            }
+        }
+    }
+    for (i = 0; i < 3; ++i) {
+        /* Convert the unicode strings to wchar[]. */
+        if (us[i] == NULL) {
+            continue;
+        }
+        len = PyUnicode_GET_SIZE(us[i]) + 1;
+        wc[i] = PyMem_NEW(wchar_t, len);
+        if (wc[i] == NULL) {
+            for (j = 0; j < 3; ++j) {
+                if (us[j] != NULL && ss[j] != us[j]) {
+                    Py_DECREF(us[j]);
+                }
+            }
+
+            PyErr_NoMemory();
+            return NULL;
+        }
+        if (PyUnicode_AsWideChar((PyUnicodeObject*)us[i], wc[i], len) == -1) {
+            for (j = 0; j < 3; ++j) {
+                if (us[j] != NULL && ss[j] != us[j]) {
+                    Py_DECREF(us[j]);
+                }
+                if (wc[j] != NULL) {
+                    PyMem_FREE(wc[j]);
+                }
+            }
+            return NULL;
+        }
+        wc[i][len - 1] = 0;
+    }
     ZeroMemory(&si, sizeof(si));
     si.cb = sizeof(si);
 
@@ -475,19 +534,29 @@ sp_CreateProcess(PyObject* self, PyObject* args)
         if (! environment)
             return NULL;
     }
+    creation_flags |= CREATE_UNICODE_ENVIRONMENT;
 
     Py_BEGIN_ALLOW_THREADS
-    result = CreateProcess(application_name,
-                           command_line,
-                           NULL,
-                           NULL,
-                           inherit_handles,
-                           creation_flags,
-                           environment ? PyString_AS_STRING(environment) : NULL,
-                           current_directory,
-                           &si,
-                           &pi);
+    result = CreateProcessW(wc[APPLICATION_NAME],
+                            wc[COMMAND_LINE],
+                            NULL,
+                            NULL,
+                            inherit_handles,
+                            creation_flags,
+                            environment ? PyString_AS_STRING(environment) : NULL,
+                            wc[CURRENT_DIRECTORY],
+                            &si,
+                            &pi);
     Py_END_ALLOW_THREADS
+
+    for (i = 0; i < 3; ++i) {
+        if (us[i] != NULL && ss[i] != us[i]) {
+            Py_DECREF(us[i]);
+        }
+        if (wc[i] != NULL) {
+            PyMem_FREE(wc[i]);
+        }
+    }
 
     Py_XDECREF(environment);
 
@@ -499,6 +568,9 @@ sp_CreateProcess(PyObject* self, PyObject* args)
                          sp_handle_new(pi.hThread),
                          pi.dwProcessId,
                          pi.dwThreadId);
+    #undef APPLICATION_NAME
+    #undef COMMAND_LINE
+    #undef CURRENT_DIRECTORY
 }
 
 PyDoc_STRVAR(TerminateProcess_doc,
