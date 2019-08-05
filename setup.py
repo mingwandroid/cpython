@@ -38,8 +38,14 @@ disabled_module_list = []
 def add_dir_to_list(dirlist, dir):
     """Add the directory 'dir' to the list 'dirlist' (at the front) if
     1) 'dir' is not already in 'dirlist'
-    2) 'dir' actually exists, and is a directory."""
+    2) 'dir' actually exists, and is a directory.
+    3) 'dir' is suffix for a macOS SDK directory (e.g. /usr/include) and
+        our host_platform is 'darwin' and appending macosx_sdk_root() to
+        dir[1:] (i.e. skipping the '/') is a directory. """
     if dir is not None and os.path.isdir(dir) and dir not in dirlist:
+        dirlist.insert(0, dir)
+    if (dir is not None and host_platform == 'darwin' and
+       os.path.isdir(os.path.join(macosx_sdk_root(), dir[1:]))):
         dirlist.insert(0, dir)
 
 def macosx_sdk_root():
@@ -47,6 +53,8 @@ def macosx_sdk_root():
     Return the directory of the current OSX SDK,
     or '/' if no SDK was specified.
     """
+    if 'CONDA_BUILD_SYSROOT' in os.environ:
+        return os.environ['CONDA_BUILD_SYSROOT']
     cflags = sysconfig.get_config_var('CFLAGS')
     m = re.search(r'-isysroot\s+(\S+)', cflags)
     if m is None:
