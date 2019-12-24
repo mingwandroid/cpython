@@ -199,10 +199,13 @@ dl_funcptr _PyImport_FindSharedFuncptrWindows(const char *prefix,
            to avoid DLL preloading attacks and enable use of the
            AddDllDirectory function. We add SEARCH_DLL_LOAD_DIR to
            ensure DLLs adjacent to the PYD are preferred. */
+        /* This resyncs values in PATH to AddDllDirectory() */
+        extern int CondaEcosystemModifyDllSearchPath(int, int);
+        CondaEcosystemModifyDllSearchPath(1, 1);
+
         Py_BEGIN_ALLOW_THREADS
         hDLL = LoadLibraryExW(wpathname, NULL,
-                              LOAD_LIBRARY_SEARCH_DEFAULT_DIRS |
-                              LOAD_LIBRARY_SEARCH_DLL_LOAD_DIR);
+                              LOAD_WITH_ALTERED_SEARCH_PATH);
         Py_END_ALLOW_THREADS
 #if HAVE_SXS
         _Py_DeactivateActCtx(cookie);
