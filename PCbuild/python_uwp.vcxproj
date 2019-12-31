@@ -90,7 +90,7 @@
   <ItemDefinitionGroup>
     <ClCompile>
       <PreprocessorDefinitions>%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>/EHsc /std:c++17 %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>/d1trimfile:%SRC_DIR%</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalDependencies>windowsapp.lib;%(AdditionalDependencies)</AdditionalDependencies>
