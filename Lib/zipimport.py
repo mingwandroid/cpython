@@ -463,6 +463,7 @@ def _read_directory(archive):
             path = _bootstrap_external._path_join(archive, name)
             t = (path, compress, data_size, file_size, file_offset, time, date, crc)
             files[name] = t
+            _bootstrap._verbose_message('zipimport: name : {}', name)
             count += 1
     _bootstrap._verbose_message('zipimport: found {} names in {!r}', count, archive)
     return files
