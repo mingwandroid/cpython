@@ -188,6 +188,11 @@ dl_funcptr _PyImport_FindSharedFuncptrWindows(const char *prefix,
 #if HAVE_SXS
         ULONG_PTR cookie = 0;
 #endif
+        /* The fix in https://bugs.python.org/issue33895 breaks 'import lief'. The fix means that any static initialization
+           cannot call into Python (or if it does it needs to aquire the GIL itself.
+           Other worse ideas:
+           DONT_RESOLVE_DLL_REFERENCES :: https://devblogs.microsoft.com/oldnewthing/20050214-00/?p=36463 */
+        int drop_gil = _wgetenv(L"CONDA_DLL_SEARCH_MODIFICATION_DROP_GIL_AS_PER_UPSTREAM") ? 1 : 0;
 
         /* Don't display a message box when Python can't load a DLL */
         old_mode = SetErrorMode(SEM_FAILCRITICALERRORS);
@@ -200,13 +205,21 @@ dl_funcptr _PyImport_FindSharedFuncptrWindows(const char *prefix,
            AddDllDirectory function. We add SEARCH_DLL_LOAD_DIR to
            ensure DLLs adjacent to the PYD are preferred. */
         /* This resyncs values in PATH to AddDllDirectory() */
+
+
         extern int CondaEcosystemModifyDllSearchPath(int, int);
         CondaEcosystemModifyDllSearchPath(1, 1);
 
-        Py_BEGIN_ALLOW_THREADS
-        hDLL = LoadLibraryExW(wpathname, NULL,
-                              LOAD_WITH_ALTERED_SEARCH_PATH);
-        Py_END_ALLOW_THREADS
+        if (drop_gil) {
+            Py_BEGIN_ALLOW_THREADS
+            hDLL = LoadLibraryExW(wpathname, NULL,
+                                LOAD_WITH_ALTERED_SEARCH_PATH);
+            Py_END_ALLOW_THREADS
+        } else {
+            hDLL = LoadLibraryExW(wpathname, NULL,
+                                LOAD_WITH_ALTERED_SEARCH_PATH);
+        }
+
 #if HAVE_SXS
         _Py_DeactivateActCtx(cookie);
 #endif
